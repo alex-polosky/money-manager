@@ -1,5 +1,56 @@
-export interface Filter<T> {
-    filter: (value: T) => boolean;
+import { Filter } from "./filter";
+import { isDateBetween, renderShortDate } from "./helper";
+import { Account, isAccount } from "./models/Account";
+
+export class AccountFilter<T extends { account: Account | string }> implements Filter<T> {
+    accountId: string; // TODO: Guid
+    public constructor(id: Account | string) {
+        if (isAccount(id)) {
+            this.accountId = id.id;
+        } else {
+            this.accountId = id;
+        }
+    }
+    public filter(value: T): boolean {
+        return this.accountId === (isAccount(value.account) ? value.account.id : value.account);
+    }
+}
+
+export class ObjectKeyFilter<T extends { [key: string]: any }> implements Filter<T> {
+    private key: string[];
+    private value: any;
+    private invert: boolean;
+    private compareFn?: (value: T) => boolean;
+    public constructor(key: string[] | string, value: any, invert: boolean = false, compareFn?: (value: T) => boolean) {
+        if (typeof key === 'string') {
+            this.key = [key];
+        } else {
+            this.key = key;
+        }
+        this.value = value;
+        this.invert = invert;
+        this.compareFn = compareFn;
+    }
+    public filter(value: T): boolean {
+        if (this.compareFn !== undefined) {
+            return this.compareFn(value);
+        }
+        let obj = value;
+        for (let key of this.key) {
+            if (key in obj) {
+                obj = obj[key];
+            } else {
+                break;
+            }
+        }
+        if (this.invert) {
+            return obj !== this.value;
+        }
+        return obj === this.value;
+    }
+    public toString(): string {
+        return `${this.key}${this.invert ? '!' : '='}=${this.value}`;
+    }
 }
 
 export class DateRangeFilter<T extends { posted: Date }> implements Filter<T> {
@@ -10,35 +61,9 @@ export class DateRangeFilter<T extends { posted: Date }> implements Filter<T> {
         this.to = to;
     }
     public filter(value: T): boolean {
-        if (this.from !== undefined && this.to !== undefined) {
-            return this.from <= value.posted && value.posted <= this.to;
-        }
-        if (this.from !== undefined) {
-            return this.from <= value.posted;
-        }
-        if (this.to !== undefined) {
-            return value.posted <= this.to;
-        }
-        console.warn('No filter to apply');
-        return true;
+        return isDateBetween(value.posted, this.from, this.to);
     }
-}
-
-export interface FilterableState<T> {
-    objects: T[];
-    filteredObjects: T[];
-    filters: Filter<T>[];
-}
-// eslint-disable-next-line
-export class FilterableState<T> {
-    public static generateStateWithFilters<T>(state: FilterableState<T>, filters?: Filter<T>[]): FilterableState<T> {
-        return {
-            ...state,
-            filters: filters ?? [],
-            filteredObjects: FilterableState.filteredTransactions(state.objects, filters ?? [])
-        };
-    }
-    public static filteredTransactions<T>(toFilter: T[], filters: Filter<T>[]): T[] {
-        return toFilter.filter((trans) => !(filters.map((filter) => (filter.filter(trans))).indexOf(false) > -1));
+    public toString(): string {
+        return (this.from !== undefined ? renderShortDate(this.from) : 'inf') + ' to ' + (this.to !== undefined ? renderShortDate(this.to) : 'inf');
     }
 }

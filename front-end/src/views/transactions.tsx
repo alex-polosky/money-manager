@@ -1,101 +1,57 @@
 import React, { ReactNode } from "react";
-import { DateRangeFilter, FilterableState } from "../filters";
-import { RenderDate } from "../helper";
-import { Manager } from "../Manager";
-import { Account } from "../models/Account";
-import { Category } from "../models/Category";
-import { PostType, Transaction } from "../models/Transaction";
+import TransactionChart from "../components/TransactionChart";
+import TransactionFilterHeader from "../components/TransactionFilterHeader";
+import TransactionGrid from "../components/TransactionGrid";
+import { TransactionPivotTable } from "../components/TransactionPivotTable";
+import { Filter, FilterableProps, FilterableState } from "../filter";
+import { ObjectKeyFilter } from "../filters";
+import { Transaction } from "../models/Transaction";
 
-interface TransactionsViewParams {
-    manager: Manager;
+interface TransactionsViewProps extends FilterableProps<Transaction> {
 }
 interface TransactionsViewState extends FilterableState<Transaction> {
+    viewGrid: boolean;
+    viewCharts: boolean;
+    viewPivot: boolean;
 }
 
-class Test extends React.Component<{ objects: Transaction[] }, {}> {
-    public render(): ReactNode {
-        return (<tbody>
-            {this.props.objects.map((value, index) =>
-                <tr key={index}>
-                    <td>{RenderDate(value.posted)}</td>
-                    <td>{(value.account as Account)?.name_friendly}</td>
-                    <td>{value.description}</td>
-                    {/* <td>{value.description_from_source}</td> */}
-                    <td>{value.post_type === PostType.DEBIT ? '- ' : ''}{value.amount}</td>
-                    <td>{(value.category as Category).name}</td>
-                </tr>
-            )}
-        </tbody>);
-    }
-}
+class TransactionsView extends React.Component<TransactionsViewProps, TransactionsViewState> {
+    public readonly builtInFilters = [
+        new ObjectKeyFilter<Transaction>(['category', 'name'], 'Transfer', true),
+        new ObjectKeyFilter<Transaction>(['category', 'category', 'name'], 'Transfer', true),
+        new ObjectKeyFilter<Transaction>(['category', 'name'], 'Hide from Budgets & Trends', true),
+        new ObjectKeyFilter<Transaction>(['category', 'category', 'name'], 'Hide from Budgets & Trends', true)
+    ];
 
-class TransactionsView extends React.Component<TransactionsViewParams, TransactionsViewState> {
-
-    constructor(props: TransactionsViewParams) {
+    constructor(props: TransactionsViewProps) {
         super(props);
         this.state = {
-            objects: [],
-            filteredObjects: [],
-            filters: []
+            ...FilterableState.generateStateWithFilters(this.props, {filteredObjects: [], filters: []}, [...this.builtInFilters]),
+            viewGrid: true,
+            viewCharts: true,
+            viewPivot: true
         };
-    }
-
-    public componentDidMount(): void {
-        if (this.props.manager.isInitialized) {
-            this.setState((state) => FilterableState.generateStateWithFilters({
-                ...state,
-                objects: [...this.props.manager.transactions]
-            }, []));
-        } else {
-            this.props.manager.addInitializeEventHandler(() => {
-                this.setState((state) => FilterableState.generateStateWithFilters({
-                    ...state,
-                    objects: [...this.props.manager.transactions]
-                }, []));
-            });
-        }
     }
 
     public render(): ReactNode {
         return (
         <div>
             <div>
-                <button onClick={() => this._toggleMonth()}>Toggle Feb month</button>
+                <TransactionFilterHeader filters={this.state.filters} addFilter={this._onAddFilter.bind(this)} removeFilter={this._onRemoveFilter.bind(this)} />
+                {this.state.viewPivot ? <TransactionPivotTable objects={this.state.filteredObjects} /> : ''}
+                {this.state.viewCharts ? <TransactionChart objects={this.state.filteredObjects} /> : ''}
+                {this.state.viewGrid ? <TransactionGrid objects={this.state.filteredObjects} /> : ''}
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Posted</th>
-                        <th>Account</th>
-                        <th>Description</th>
-                        {/* <th>OG Description</th> */}
-                        <th>Amount</th>
-                        <th>Category</th>
-                    </tr>
-                </thead>
-                {<Test objects={this.state.filteredObjects} />}
-                {/* <tbody>
-                    {this.state.filteredObjects.map((value, index) =>
-                        <tr key={index}>
-                            <td>{RenderDate(value.posted)}</td>
-                            <td>{(value.account as Account)?.name_friendly}</td>
-                            <td>{value.description}</td>
-                            <td>{value.post_type === PostType.DEBIT ? '- ' : ''}{value.amount}</td>
-                            <td>{(value.category as Category).name}</td>
-                        </tr>
-                    )}
-                </tbody> */}
-            </table>
         </div>
         );
     }
 
-    private _toggleMonth(): void {
-        if (this.state.filters.length === 0) {
-            this.setState((state) => FilterableState.generateStateWithFilters(state, [new DateRangeFilter<Transaction>(new Date(2021, 1, 1))]));
-        } else {
-            this.setState((state) => FilterableState.generateStateWithFilters(state));
-        }
+    private _onAddFilter(filter: Filter<Transaction>): void {
+        this.setState((state) => FilterableState.generateStateWithFilters(this.props, state, [...this.state.filters, filter]));
+    }
+
+    private _onRemoveFilter(filter: Filter<Transaction>): void {
+        this.setState((state) => FilterableState.generateStateWithFilters(this.props, state, state.filters.filter((value) => value !== filter)));
     }
 }
 

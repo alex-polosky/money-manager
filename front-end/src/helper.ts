@@ -1,4 +1,10 @@
-export function RenderDate(date: Date): string {
+const padDay: (v: number) => string = (v: number) => {
+    return v < 10 ? '0' + v.toString() : v.toString();
+};
+
+export const maxDate = new Date(99999, 999999, 9999999, 99999999, 9999999999, 999999999999, 9999999999999);
+
+export function renderShortDate(date: Date): string {
     const months: { [key: number]: string } = {
         0: 'Jan',
         1: 'Feb',
@@ -13,8 +19,40 @@ export function RenderDate(date: Date): string {
         10: 'Nov',
         11: 'Dec'
     }
-    const padDay: (v: number) => string = (v: number) => {
-        return v < 10 ? '0' + v.toString() : v.toString();
-    };
     return `${months[date.getMonth()]}-${padDay(date.getDate())}-${date.getFullYear()}`;
+}
+
+export function renderUSADate(date: Date, separator: string = '-'): string {
+    return `${date.getFullYear()}${separator}${padDay(date.getMonth()+1)}${separator}${padDay(date.getDate())}`
+}
+
+export function areDatesEqual(a: Date, b: Date): boolean {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+export function isDateBetween(date: Date, from?: Date, to?: Date) {
+    date = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    if (from !== undefined && to !== undefined) {
+        return from <= date && date <= to;
+    }
+    if (from !== undefined) {
+        return from <= date;
+    }
+    if (to !== undefined) {
+        return date <= to;
+    }
+    console.warn('No dates to compare to');
+    return true;
+}
+
+export function isDateInMonth(dateToCheck: Date, targetDate: Date): boolean {
+    return isDateBetween(dateToCheck, new Date(targetDate.getFullYear(), targetDate.getMonth()), new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0));
+}
+
+export function throwError(error: string | Error): never {
+    if (typeof error === 'string') {
+        throw new Error(error);
+    } else {
+        throw error;
+    }
 }

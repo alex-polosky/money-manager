@@ -1,35 +1,19 @@
 import React, { ReactNode } from "react";
-import { Manager } from "../Manager";
 import { Account, AccountClassifier } from "../models/Account";
 
-interface AccountsViewParams {
-    manager: Manager;
+interface AccountsViewProps {
+    objects: Account[];
 }
 interface AccountsViewState {
-    accounts: Account[];
 }
 
-class AccountsView extends React.Component<AccountsViewParams, AccountsViewState> {
+class AccountsView extends React.Component<AccountsViewProps, AccountsViewState> {
 
-    constructor(props: AccountsViewParams) {
-        super(props);
-        this.state = {
-            accounts: []
-        };
-    }
+    // constructor(props: AccountsViewProps) {
+    //     super(props);
+    // }
 
     public componentDidMount(): void {
-        if (this.props.manager.isInitialized) {
-            this.setState({
-                accounts: this.props.manager.accounts
-            });
-        } else {
-            this.props.manager.addInitializeEventHandler(() => {
-                this.setState({
-                    accounts: this.props.manager.accounts
-                });
-            });
-        }
     }
 
     public render(): ReactNode {
@@ -46,7 +30,7 @@ class AccountsView extends React.Component<AccountsViewParams, AccountsViewState
                 </tr>
             </thead>
             <tbody>
-                {this.state.accounts.map((value, index, array) =>
+                {this.props.objects.map((value, index, array) =>
                     <tr key={index}>
                         <td>{value.id}</td>
                         <td>{AccountClassifier[value.classifier]}</td>

@@ -17,15 +17,19 @@ class _base_uuid_model(models.Model):
         abstract = True
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    origin_key = models.TextField(null=True)
 
 class _base_uuid_model_poly(PolymorphicModel):
+# class _base_uuid_model_poly(models.Model):
     class Meta:
         abstract = True
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    origin_key = models.TextField(null=True)
 
 class Account(_base_uuid_model):
     class Meta:
+        app_label = 'money_details'
         ordering = ['classifier', 'name_friendly']
 
     class Classifier(models.IntegerChoices):
@@ -43,6 +47,9 @@ class Account(_base_uuid_model):
     name_friendly = models.CharField(max_length=200, help_text='A friendly name for the account')
     is_active = models.BooleanField(default=True)
 
+    def generate_origin_key(self, origin):
+        return "{0}2:<'{1}'>".format(origin, self.name_transaction)
+
     def __repr__(self):
         return f'<Account({self.name_transaction})>'
 
@@ -51,11 +58,15 @@ class Account(_base_uuid_model):
 
 class AccountCurrentValue(_base_uuid_model):
     class Meta:
+        app_label = 'money_details'
         ordering = ['posted', 'account__name_friendly']
 
     posted = models.DateField()
     amount = models.IntegerField() # TODO: https://github.com/django-money/django-money ??
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='+')
+
+    def generate_origin_key(self, origin):
+        raise NotImplementedError()
 
     def __repr__(self):
         return f'<AccountCurrentValue({self.account.name_transaction} : {self.amount})>'
@@ -65,10 +76,14 @@ class AccountCurrentValue(_base_uuid_model):
 
 class Category(_base_uuid_model_poly):
     class Meta:
+        app_label = 'money_details'
         ordering = ['name']
 
     name = models.CharField(max_length=200, unique=True)
     from_mint = models.BooleanField(default=False)
+
+    def generate_origin_key(self, origin):
+        return "{0}0:<'{1}'>".format(origin, self.name)
 
     def __repr__(self):
         return f'<Category({self.name})>'
@@ -78,9 +93,13 @@ class Category(_base_uuid_model_poly):
 
 class SubCategory(Category):
     class Meta:
+        app_label = 'money_details'
         ordering = ['category__name', 'name']
 
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='+')
+
+    def generate_origin_key(self, origin):
+        return "{0}1:<'{1}'-'{2}'>".format(origin, self.category.name, self.name)
 
     def __repr__(self):
         return f'<SubCategory({self.category.name}: {self.name})>'
@@ -90,6 +109,7 @@ class SubCategory(Category):
 
 class Transaction(_base_uuid_model):
     class Meta:
+        app_label = 'money_details'
         ordering = ['-posted']
 
     class Post_Type(models.IntegerChoices):
@@ -106,6 +126,9 @@ class Transaction(_base_uuid_model):
     notes = models.TextField(null=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='+')
+
+    def generate_origin_key(self, origin):
+        return "{0}3:<'{1}'-'{2}'-'{3}'-'{4}'-'{5}'>".format(origin, self.posted, self.description_from_source, self.amount, self.post_type, self.account)
 
     def __repr__(self):
         isDebit = self.post_type == Transaction.Post_Type.DEBIT

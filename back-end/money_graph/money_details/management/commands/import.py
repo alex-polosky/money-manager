@@ -1,3 +1,4 @@
+import base64
 import csv
 from dateutil import parser
 from typing import Any, Callable, Optional
@@ -23,15 +24,17 @@ class Command(BaseCommand):
         self._read_csv(FILE_TRAS, self._handle_tras)
 
     @transaction.atomic
-    def _read_csv(self, fPath: str, onRow: Callable[[Any], None]) -> None:
+    def _read_csv(self, fPath: str, onRow: Callable[[Any, int], None]) -> None:
         with open (fPath, newline='') as csv_f:
             csv_r = csv.reader(csv_f)
             headers = None
+            i = 0
             for row in csv_r:
                 if not headers:
                     headers = row
                     continue
-                onRow(dict(zip(headers, row)))
+                onRow(dict(zip(headers, row)), i)
+                i += 1
 
     def _load_current_cats(self) -> None:
         self._cats = {}
@@ -43,7 +46,7 @@ class Command(BaseCommand):
         for subcat in money_details.SubCategory.objects.all():
             self._subcats[subcat.name] = subcat
 
-    def _handle_cats(self, row) -> None:
+    def _handle_cats(self, row, index) -> None:
         # TODO: get rid of dependency on header names
         cat_name = row['Category']
         sub_cat_name = row['SubCategory']
@@ -57,6 +60,7 @@ class Command(BaseCommand):
             cat = self._cats[cat_name]
         else:
             cat = money_details.Category(name=cat_name, from_mint=from_mint)
+            cat.origin_key = cat.generate_origin_key('mint')
             try:
                 cat.save()
             except BaseException as ex:
@@ -65,13 +69,15 @@ class Command(BaseCommand):
             self._cats[cat.name] = cat
 
         if sub_cat_name not in self._subcats and sub_cat_name != cat_name:
-            sub_cat = money_details.SubCategory(name=sub_cat_name, category=cat, from_mint=from_mint)
+            sub_cat = money_details.SubCategory(name=sub_cat_name, category=cat)
+            sub_cat.origin_key = sub_cat.generate_origin_key('mint')
             try:
                 sub_cat.save()
             except BaseException as ex:
                 self.stderr.write(f'Error saving sub-category with name {sub_cat_name}')
                 raise ex
-            self._subcats[sub_cat.name] = sub_cat.id
+            # self._subcats[sub_cat.name] = sub_cat.id
+            self._subcats[sub_cat.name] = sub_cat
 
         # self.stdout.write(row)
 
@@ -89,7 +95,7 @@ class Command(BaseCommand):
         else:
             return a - b
 
-    def _handle_accs(self, row) -> None:
+    def _handle_accs(self, row, index) -> None:
         # TODO: get rid of dependency on header names
         classifier = dict(zip([''.join(x.upper().split()) for x in money_details.Account.Classifier.labels], money_details.Account.Classifier.values))
 
@@ -103,7 +109,9 @@ class Command(BaseCommand):
                 name_friendly=row['Name'],
                 is_active=not (row['IsActive'].upper() in ('FALSE', 'NO', 'N', '0'))
             )
+            acc.origin_key = acc.generate_origin_key('mint')
             acc.save()
+            self._accs[acc.name_transaction] = acc
 
         money_details.AccountCurrentValue.objects.get_or_create(
             account_id=acc.id,
@@ -111,17 +119,23 @@ class Command(BaseCommand):
             posted=parser.parse(row['DateOfCurrent']).date()
         )
 
-    def _handle_tras(self, row) -> None:
+    def _handle_tras(self, row, index) -> None:
         # TODO: get rid of dependency on header names
         post_type = dict(zip([''.join(x.upper().split()) for x in money_details.Transaction.Post_Type.labels], money_details.Transaction.Post_Type.values))
 
-        money_details.Transaction(
-            posted=parser.parse(row['Date']).date(),
-            description=row['Description'],
-            description_from_source=row['Original Description'],
-            amount=self.parse_int(row['Amount']),
-            post_type=post_type[''.join(row['Transaction Type'].upper().split())],
-            notes=row['Notes'],
-            account=self._accs[row['Account Name']],
-            category=self._subcats[row['SubCategory']] if row['SubCategory'] in self._subcats else self._cats[row['SubCategory']]
-        ).save()
+        try:
+            trans = money_details.Transaction(
+                posted=parser.parse(row['Date']).date(),
+                description=row['Description'],
+                description_from_source=row['Original Description'],
+                amount=self.parse_int(row['Amount']),
+                post_type=post_type[''.join(row['Transaction Type'].upper().split())],
+                notes=row['Notes'],
+                account=self._accs[row['Account Name']],
+                category=self._subcats[row['SubCategory']] if row['SubCategory'] in self._subcats else self._cats[row['SubCategory']]
+            )
+            trans.origin_key = trans.generate_origin_key('mint')
+            trans.save()
+        except BaseException as ex:
+            print(index)
+            raise ex

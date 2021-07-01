@@ -1,6 +1,6 @@
 import { Filter } from "./filter";
 import { isDateBetween, renderShortDate } from "./helper";
-import { Account, isAccount } from "./models/Account";
+import { Account, isAccount } from "./models/money-details/Account";
 
 export class AccountFilter<T extends { account: Account | string }> implements Filter<T> {
     accountId: string; // TODO: Guid
@@ -37,7 +37,7 @@ export class ObjectKeyFilter<T extends { [key: string]: any }> implements Filter
         }
         let obj = value;
         for (let key of this.key) {
-            if (key in obj) {
+            if (typeof obj === 'object' && key in obj) {
                 obj = obj[key];
             } else {
                 break;

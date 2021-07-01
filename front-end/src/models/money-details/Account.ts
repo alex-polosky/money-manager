@@ -11,6 +11,7 @@ export enum AccountClassifier {
 
 export interface Account {
     id: string; // TODO: guid
+    origin_key?: string;
     classifier: AccountClassifier;
     name_transaction: string;
     provider: string;

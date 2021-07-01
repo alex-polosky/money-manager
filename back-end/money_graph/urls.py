@@ -18,10 +18,12 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
 from money_graph.money_details.api import router as money_details_api
+from money_graph.money_planner.api import router as money_planner_api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(money_details_api.urls)),
+    path('api/money-details/', include(money_details_api.urls)),
+    path('api/money-planner/', include(money_planner_api.urls)),
     path('api-token-auth/', obtain_auth_token)
     # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')) # used for logging into the api
 ]

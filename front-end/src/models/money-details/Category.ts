@@ -1,5 +1,6 @@
 export interface Category {
     id: string; // TODO: guid
+    origin_key?: string;
     name: string;
     from_mint: boolean;
 }

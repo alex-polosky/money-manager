@@ -2,6 +2,7 @@ import { Account, isAccount } from "./Account";
 
 export interface AccountCurrentValue {
     id: string; // TODO: guid
+    origin_key?: string;
     posted: Date;
     amount: number; // TODO: money
     account: Account | string;

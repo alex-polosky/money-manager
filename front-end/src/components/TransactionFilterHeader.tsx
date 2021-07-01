@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { DateRangeFilter, ObjectKeyFilter } from "../filters";
-import { Transaction } from "../models/Transaction";
+import { Transaction } from "../models/money-details/Transaction";
 import FilterHeader from "./FilterHeader";
 
 class TransactionFilterHeader extends FilterHeader<Transaction> {

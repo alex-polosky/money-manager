@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'money_graph.money_details',
+    'money_graph.money_planner'
 ]
 
 MIDDLEWARE = [
@@ -98,6 +99,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        # 'NAME': BASE_DIR / 'db.empty_template.sqlite3', # Only used for updating the empty template db
     }
 }
 

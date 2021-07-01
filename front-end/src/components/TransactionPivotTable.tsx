@@ -4,11 +4,11 @@ import TableRenderers from 'react-pivottable/TableRenderers';
 import PivotTableUI from 'react-pivottable/PivotTableUI';
 import createPlotlyRenderers from 'react-pivottable/PlotlyRenderers';
 import Plot from 'react-plotly.js';
-import { PostType, Transaction } from "../models/Transaction";
+import { PostType, Transaction } from "../models/money-details/Transaction";
 import { renderUSADate } from "../helper";
-import { Account, isAccount } from "../models/Account";
-import { Category, isCategory } from "../models/Category";
-import { isSubCategory, SubCategory } from "../models/SubCategory";
+import { Account, isAccount } from "../models/money-details/Account";
+import { Category, isCategory } from "../models/money-details/Category";
+import { isSubCategory, SubCategory } from "../models/money-details/SubCategory";
 
 const PlotlyRenderers = createPlotlyRenderers(Plot.prototype);
 
@@ -56,7 +56,6 @@ export class TransactionPivotTable extends React.Component<TransactionPivotTable
                 onChange={(state) => this.setState(state)}
                 // renderers={Object.assign({}, TableRenderers, PlotlyRenderers)}
             />
-            Placeholder here
         </div>);
     }
     private generateData(data: Transaction[]): Data[] {

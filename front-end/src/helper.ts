@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 const padDay: (v: number) => string = (v: number) => {
     return v < 10 ? '0' + v.toString() : v.toString();
 };
@@ -55,4 +57,13 @@ export function throwError(error: string | Error): never {
     } else {
         throw error;
     }
+}
+
+export function ensureDate(date: Date): Date {
+    return (typeof date === 'string') !== undefined ? DateTime.fromFormat(date as unknown as string, 'yyyy-MM-dd').toJSDate() : date;
+}
+
+export function dton(decimalNumber: number): number {
+    // return parseInt((decimalNumber / 100).toFixed(0)) + parseInt((decimalNumber / 100).toFixed(2).split('.')[1]) / 100
+    return (decimalNumber / 100);
 }

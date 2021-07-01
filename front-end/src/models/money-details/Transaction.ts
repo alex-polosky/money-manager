@@ -10,6 +10,7 @@ export enum PostType {
 
 export interface Transaction {
     id: string; // TODO: guid
+    origin_key?: string;
     posted: Date;
     description: string;
     description_from_source: string;
@@ -30,7 +31,7 @@ export function isTransaction(obj: any): obj is Transaction {
         && typeof obj['description_from_source'] === 'string'
         && typeof obj['amount'] === 'number'
         && typeof obj['post_type'] === 'number'
-        && (typeof obj['notes'] === 'string' || typeof obj['notes'] === undefined)
+        && (typeof obj['notes'] === 'string' || typeof obj['notes'] === undefined || obj['notes'] === null)
         && (typeof obj['account'] === 'string' || isAccount(obj['account']))
         && (typeof obj['category'] === 'string' || isCategory(obj['category']) || isSubCategory(obj['category']));
 }

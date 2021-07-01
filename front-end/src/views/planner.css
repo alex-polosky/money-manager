@@ -1,0 +1,10 @@
+table td, table td * {
+    vertical-align: top;
+}
+
+.money-cell {
+    text-align: right;
+}
+.money-cell::before {
+    content: "$";
+}

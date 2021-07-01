@@ -1,13 +1,18 @@
 import React, { ReactNode } from "react";
+import { useEffect } from "react";
 import TransactionChart from "../components/TransactionChart";
 import TransactionFilterHeader from "../components/TransactionFilterHeader";
 import TransactionGrid from "../components/TransactionGrid";
 import { TransactionPivotTable } from "../components/TransactionPivotTable";
+import { MoneyDetailsController } from "../controllers/MoneyDetails";
 import { Filter, FilterableProps, FilterableState } from "../filter";
 import { ObjectKeyFilter } from "../filters";
-import { Transaction } from "../models/Transaction";
+import loading from "../components/loading";
+import { Transaction } from "../models/money-details/Transaction";
 
 interface TransactionsViewProps extends FilterableProps<Transaction> {
+    controller: MoneyDetailsController;
+    isReady: boolean;
 }
 interface TransactionsViewState extends FilterableState<Transaction> {
     viewGrid: boolean;
@@ -31,19 +36,42 @@ class TransactionsView extends React.Component<TransactionsViewProps, Transactio
             viewCharts: true,
             viewPivot: true
         };
+
+        // useEffect(() => {
+        //     this.state = {
+        //         ...this.state,
+        //         ...FilterableState.generateStateWithFilters(this.props, {filteredObjects: [], filters: []}, [...this.builtInFilters])
+        //     };
+        // }, [this.props.objects]);
+    }
+
+    componentWillReceiveProps(nextProps: Readonly<TransactionsViewProps>) {
+        // Skipping usual check for objects
+        this.setState((state) => ({
+            ...state,
+            ...FilterableState.generateStateWithFilters(nextProps, {filteredObjects: [], filters: []}, [...this.builtInFilters])
+        }));
     }
 
     public render(): ReactNode {
-        return (
+        const render = (
         <div>
             <div>
                 <TransactionFilterHeader filters={this.state.filters} addFilter={this._onAddFilter.bind(this)} removeFilter={this._onRemoveFilter.bind(this)} />
-                {this.state.viewPivot ? <TransactionPivotTable objects={this.state.filteredObjects} /> : ''}
-                {this.state.viewCharts ? <TransactionChart objects={this.state.filteredObjects} /> : ''}
-                {this.state.viewGrid ? <TransactionGrid objects={this.state.filteredObjects} /> : ''}
+                {/* {this.state.viewPivot ? <TransactionPivotTable objects={this.state.filteredObjects} /> : ''} */}
+                {/* {this.state.viewCharts ? <TransactionChart objects={this.state.filteredObjects} /> : ''} */}
+                {this.state.viewGrid
+                    ? <TransactionGrid
+                        accounts={this.props.controller.accounts}
+                        categories={this.props.controller.categories}
+                        objects={this.state.filteredObjects}
+                    />
+                    : ''}
             </div>
         </div>
         );
+
+        return (this.props.isReady ? render : loading());
     }
 
     private _onAddFilter(filter: Filter<Transaction>): void {

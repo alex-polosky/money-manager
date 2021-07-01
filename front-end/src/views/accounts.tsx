@@ -1,8 +1,10 @@
 import React, { ReactNode } from "react";
-import { Account, AccountClassifier } from "../models/Account";
+import loading from "../components/loading";
+import { Account, AccountClassifier } from "../models/money-details/Account";
 
 interface AccountsViewProps {
     objects: Account[];
+    isReady: boolean;
 }
 interface AccountsViewState {
 }
@@ -17,7 +19,7 @@ class AccountsView extends React.Component<AccountsViewProps, AccountsViewState>
     }
 
     public render(): ReactNode {
-        return (
+        const render = (
         <table>
             <thead>
                 <tr>
@@ -43,6 +45,8 @@ class AccountsView extends React.Component<AccountsViewProps, AccountsViewState>
             </tbody>
         </table>
         );
+
+        return (this.props.isReady ? render : loading());
     }
 }
 

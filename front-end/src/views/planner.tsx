@@ -1,12 +1,13 @@
 import './planner.css';
+
+import { InstanceAccount } from '../models/money-planner/InstanceAccount';
 import { MoneyPlannerController } from "../controllers/MoneyPlanner";
-import loading from "../components/loading";
 import { isAccount } from "../models/money-planner/Account";
 import { isExpense } from "../models/money-planner/Expense";
 import { isIncome } from "../models/money-planner/Income";
-import { isTransfer } from "../models/money-planner/Transfer";
-import { InstanceAccount } from '../models/money-planner/InstanceAccount';
 import { isInstance } from '../models/money-planner/Instance';
+import { isTransfer } from "../models/money-planner/Transfer";
+import loading from "../components/loading";
 
 interface PlannerViewProps {
     controller: MoneyPlannerController;

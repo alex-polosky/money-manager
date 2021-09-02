@@ -7,7 +7,7 @@ from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 from money_graph.money_planner import models as money_planner
 
-FILE_EX = 'S:/code/local/money-stuff/inc/example-expense-estimator-thing.json'
+FILE_EX = 'D:/code/local/money-stuff/inc/full-history.json'
 
 class Command(BaseCommand):
 

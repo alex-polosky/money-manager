@@ -6,9 +6,9 @@ from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 from money_graph.money_details import models as money_details
 
-FILE_ACCS = 'S:/code/local/money-stuff/inc/accounts.csv'
-FILE_CATS = 'S:/code/local/money-stuff/inc/categories.csv'
-FILE_TRAS = 'S:/code/local/money-stuff/inc/transactions.csv'
+FILE_ACCS = 'D:/code/local/money-stuff/inc/accounts.csv'
+FILE_CATS = 'D:/code/local/money-stuff/inc/categories.csv'
+FILE_TRAS = 'D:/code/local/money-stuff/inc/transactions.csv'
 
 class Command(BaseCommand):
 

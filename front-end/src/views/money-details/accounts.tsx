@@ -1,6 +1,7 @@
+import { Account, AccountClassifier } from "../../models/money-details/Account";
 import React, { ReactNode } from "react";
-import loading from "../components/loading";
-import { Account, AccountClassifier } from "../models/money-details/Account";
+
+import loading from "../../components/loading";
 
 interface AccountsViewProps {
     objects: Account[];

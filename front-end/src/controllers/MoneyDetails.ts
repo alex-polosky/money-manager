@@ -1,7 +1,9 @@
-import { Api } from '../api/api';
+import * as MoneyDetails from '../models/money-details/models';
+
 import { ArrayApiLoader, ArrayApiLoaderMulti } from '../arrayLoader';
 import { dton, ensureDate } from '../helper';
-import * as MoneyDetails from '../models/money-details/models';
+
+import MoneyDetailsApi from '../api/money-details';
 
 export class MoneyDetailsController {
     public readonly accounts: ArrayApiLoader<MoneyDetails.Account>;
@@ -9,19 +11,19 @@ export class MoneyDetailsController {
     public readonly transactions: ArrayApiLoader<MoneyDetails.Transaction>;
     public readonly categories: ArrayApiLoaderMulti<MoneyDetails.Category>;
 
-    constructor(api: Api) {
-        this.accounts = new ArrayApiLoader(api.moneyDetails.account, async (each) => {
+    constructor(api: MoneyDetailsApi) {
+        this.accounts = new ArrayApiLoader(api.account, async (each) => {
             each.accountCurrentValues = [];
         });
-        this.accountCurrentValues = new ArrayApiLoader(api.moneyDetails.accountCurrentValue, (each) => {
+        this.accountCurrentValues = new ArrayApiLoader(api.accountCurrentValue, (each) => {
             each.posted = ensureDate(each.posted);
             each.amount = dton(each.amount);
         });
-        this.transactions = new ArrayApiLoader(api.moneyDetails.transaction, (each) => {
+        this.transactions = new ArrayApiLoader(api.transaction, (each) => {
             each.posted = ensureDate(each.posted);
             each.amount = dton(each.amount);
         });
-        this.categories = new ArrayApiLoaderMulti(undefined, api.moneyDetails.category, api.moneyDetails.subcategory);
+        this.categories = new ArrayApiLoaderMulti(undefined, api.category, api.subcategory);
     }
 
     public loadAll(afterEachLoad?: () => void, afterAllLoad?: () => void) {

@@ -1,9 +1,10 @@
+import { PostType, Transaction } from "../../models/money-details/Transaction";
 import React, { ReactNode } from "react";
+
 import Charty from 'react-charty';
-import { PostType, Transaction } from "../models/money-details/Transaction";
-import { DailyTotalsMovement } from "./charts/DailyTotalsMovement";
-import { MonthlyDailyTotalsMovement } from "./charts/MonthlyDailyTotalsMovement";
-import { MonthlyTotalsMovement } from "./charts/MonthlyTotalsMovement";
+import { DailyTotalsMovement } from "../charts/DailyTotalsMovement";
+import { MonthlyDailyTotalsMovement } from "../charts/MonthlyDailyTotalsMovement";
+import { MonthlyTotalsMovement } from "../charts/MonthlyTotalsMovement";
 
 interface TransactionChartProps {
     objects: Transaction[];

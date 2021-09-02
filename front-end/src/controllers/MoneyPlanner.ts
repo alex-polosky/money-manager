@@ -1,7 +1,9 @@
-import { Api } from '../api/api';
-import { ArrayApiLoader } from '../arrayLoader';
-import { dton, ensureDate } from '../helper';
 import * as MoneyPlanner from '../models/money-planner/models';
+
+import { dton, ensureDate } from '../helper';
+
+import { ArrayApiLoader } from '../arrayLoader';
+import MoneyPlannerApi from '../api/money-planner';
 
 export class MoneyPlannerController {
     public readonly accounts: ArrayApiLoader<MoneyPlanner.Account>;
@@ -36,33 +38,33 @@ export class MoneyPlannerController {
             && this.transfers.isReady;
     }
 
-    constructor(api: Api) {
-        this.accounts = new ArrayApiLoader(api.moneyPlanner.account);
-        this.expenses = new ArrayApiLoader(api.moneyPlanner.expense, (each) => {
+    constructor(api: MoneyPlannerApi) {
+        this.accounts = new ArrayApiLoader(api.account);
+        this.expenses = new ArrayApiLoader(api.expense, (each) => {
             each.value = dton(each.value);
         });
-        this.incomes = new ArrayApiLoader(api.moneyPlanner.income, (each) => {
+        this.incomes = new ArrayApiLoader(api.income, (each) => {
             each.value = dton(each.value);
         });
-        this.instances = new ArrayApiLoader(api.moneyPlanner.instance, (each) => {
+        this.instances = new ArrayApiLoader(api.instance, (each) => {
             each.date = ensureDate(each.date);
             each.accounts = [];
         });
-        this.instanceAccounts = new ArrayApiLoader(api.moneyPlanner.instanceaccount, (each) => {
+        this.instanceAccounts = new ArrayApiLoader(api.instanceaccount, (each) => {
             each.start_balance = dton(each.start_balance);
             each.expenses = [];
             each.incomes = [];
             each.transfers = [];
         });
-        this.instanceExpenses = new ArrayApiLoader(api.moneyPlanner.instanceexpense);
-        this.instanceIncomes = new ArrayApiLoader(api.moneyPlanner.instanceincome);
-        this.instanceTransfers = new ArrayApiLoader(api.moneyPlanner.instancetransfer);
-        this.templates = new ArrayApiLoader(api.moneyPlanner.template);
-        this.templateAccounts = new ArrayApiLoader(api.moneyPlanner.templateaccount);
-        this.templateExpenses = new ArrayApiLoader(api.moneyPlanner.templateexpense);
-        this.templateIncomes = new ArrayApiLoader(api.moneyPlanner.templateincome);
-        this.templateTransfers = new ArrayApiLoader(api.moneyPlanner.templatetransfer);
-        this.transfers = new ArrayApiLoader(api.moneyPlanner.transfer, (each) => {
+        this.instanceExpenses = new ArrayApiLoader(api.instanceexpense);
+        this.instanceIncomes = new ArrayApiLoader(api.instanceincome);
+        this.instanceTransfers = new ArrayApiLoader(api.instancetransfer);
+        this.templates = new ArrayApiLoader(api.template);
+        this.templateAccounts = new ArrayApiLoader(api.templateaccount);
+        this.templateExpenses = new ArrayApiLoader(api.templateexpense);
+        this.templateIncomes = new ArrayApiLoader(api.templateincome);
+        this.templateTransfers = new ArrayApiLoader(api.templatetransfer);
+        this.transfers = new ArrayApiLoader(api.transfer, (each) => {
             each.value = dton(each.value);
         });
     }

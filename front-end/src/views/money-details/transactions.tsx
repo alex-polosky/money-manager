@@ -1,14 +1,15 @@
+import { Filter, FilterableProps, FilterableState } from "../../filter";
 import React, { ReactNode } from "react";
+
+import { MoneyDetailsController } from "../../controllers/MoneyDetails";
+import { ObjectKeyFilter } from "../../filters";
+import { Transaction } from "../../models/money-details/Transaction";
+import TransactionChart from "../../components/money-planner/TransactionChart";
+import TransactionFilterHeader from "../../components/money-planner/TransactionFilterHeader";
+import TransactionGrid from "../../components/money-planner/TransactionGrid";
+import { TransactionPivotTable } from "../../components/money-planner/TransactionPivotTable";
+import loading from "../../components/loading";
 import { useEffect } from "react";
-import TransactionChart from "../components/TransactionChart";
-import TransactionFilterHeader from "../components/TransactionFilterHeader";
-import TransactionGrid from "../components/TransactionGrid";
-import { TransactionPivotTable } from "../components/TransactionPivotTable";
-import { MoneyDetailsController } from "../controllers/MoneyDetails";
-import { Filter, FilterableProps, FilterableState } from "../filter";
-import { ObjectKeyFilter } from "../filters";
-import loading from "../components/loading";
-import { Transaction } from "../models/money-details/Transaction";
 
 interface TransactionsViewProps extends FilterableProps<Transaction> {
     controller: MoneyDetailsController;

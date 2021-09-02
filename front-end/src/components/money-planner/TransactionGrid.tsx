@@ -1,10 +1,11 @@
+import { Account, isAccount } from '../../models/money-details/Account';
+import { Category, isCategory } from '../../models/money-details/Category';
+import { EditableColumnType, EditableTable } from '../EditableTable';
+import { PostType, Transaction } from "../../models/money-details/Transaction";
+import { SubCategory, isSubCategory } from '../../models/money-details/SubCategory';
+
 import { Popconfirm } from 'antd';
-import { EditableColumnType, EditableTable } from './EditableTable';
-import { renderShortDate } from '../helper';
-import { Account, isAccount } from '../models/money-details/Account';
-import { Category, isCategory } from '../models/money-details/Category';
-import { isSubCategory, SubCategory } from '../models/money-details/SubCategory';
-import { PostType, Transaction } from "../models/money-details/Transaction";
+import { renderShortDate } from '../../helper';
 
 interface TransactionGridViewProps {
     accounts: Account[];

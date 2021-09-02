@@ -1,12 +1,14 @@
-import { Button } from 'antd';
-import React from 'react';
-import { Api } from './api/api';
 import './App.css';
-import AccountsView from './views/accounts';
-import TransactionsView from './views/transactions';
+
+import AccountsView from './views/money-details/accounts';
+import { Button } from 'antd';
+import MoneyDetailsApi from './api/money-details';
 import { MoneyDetailsController } from './controllers/MoneyDetails';
+import MoneyPlannerApi from './api/money-planner';
 import { MoneyPlannerController } from './controllers/MoneyPlanner';
-import PlannerView from './views/planner';
+import PlannerView from './views/money-planner/planner';
+import React from 'react';
+import TransactionsView from './views/money-details/transactions';
 
 enum Page {
     HOME,
@@ -26,14 +28,16 @@ interface AppViewState {
 }
 
 class App extends React.Component<AppViewProps, AppViewState> {
-    protected _api = new Api('http://localhost:8000');
+    private static __apiUrl = 'http://localhost:8000';
+    private _moneyDetailsApi = new MoneyDetailsApi(App.__apiUrl);
+    private _moneyPlannerApi = new MoneyPlannerApi(App.__apiUrl);
 
     constructor(props: AppViewProps) {
         super(props);
         this.state = {
             controllers: {
-                moneyDetails: new MoneyDetailsController(this._api),
-                moneyPlanner: new MoneyPlannerController(this._api)
+                moneyDetails: new MoneyDetailsController(this._moneyDetailsApi),
+                moneyPlanner: new MoneyPlannerController(this._moneyPlannerApi)
             },
             page: Page.HOME
         };
@@ -47,8 +51,8 @@ class App extends React.Component<AppViewProps, AppViewState> {
     private async _loadData(): Promise<void> {
         try {
             await Promise.all([
-                this._api.moneyDetails.preAuthenticate(),
-                this._api.moneyPlanner.preAuthenticate()
+                this._moneyDetailsApi.preAuthenticate(),
+                this._moneyPlannerApi.preAuthenticate()
             ]);
 
             await Promise.all([
